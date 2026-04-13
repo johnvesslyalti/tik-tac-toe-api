@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   postgres:
     image: postgres:12.2-alpine
@@ -25,7 +23,23 @@ services:
       - "7350:7350"
       - "7351:7351"
     volumes:
-      - ./:/nakama/data
+      - ./src/modules:/nakama/data/modules
+
+  node-app:
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      - nakama
+    environment:
+      - NAKAMA_HOST=nakama
+      - NAKAMA_PORT=7350
+      - NAKAMA_SERVER_KEY=defaultkey
 
 volumes:
   data:
