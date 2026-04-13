@@ -33,10 +33,11 @@ services:
       - .:/app
       - /app/node_modules
     ports:
-      - "3000:3000"
+      - "5000:5000"
     depends_on:
       - nakama
     environment:
+      - PORT=5000
       - NAKAMA_HOST=nakama
       - NAKAMA_PORT=7350
       - NAKAMA_SERVER_KEY=defaultkey
