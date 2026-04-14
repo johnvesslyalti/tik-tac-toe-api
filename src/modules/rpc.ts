@@ -34,7 +34,14 @@ export function listMatchesRpc(
   logger.debug("RPC: list_matches called");
 
   try {
-    const matches = nk.matchList(10, true, "tic-tac-toe");
+    const matches = nk.matchList(
+      10,
+      true,
+      null,
+      0,
+      2,
+      "+label.type:tictactoe",
+    );
     return JSON.stringify({ matches });
   } catch (e: any) {
     logger.error("Failed to list matches: %s", e.message);

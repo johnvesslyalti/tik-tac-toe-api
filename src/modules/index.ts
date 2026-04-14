@@ -6,6 +6,7 @@ import {
   matchLoop,
   matchTerminate,
   matchSignal,
+  matchmakerMatched,
 } from "./matchHandler";
 import { createMatchRpc, listMatchesRpc } from "./rpc";
 
@@ -27,6 +28,7 @@ export function InitModule(
   global.matchLoop = matchLoop;
   global.matchTerminate = matchTerminate;
   global.matchSignal = matchSignal;
+  global.matchmakerMatched = matchmakerMatched;
   global.createMatchRpc = createMatchRpc;
   global.listMatchesRpc = listMatchesRpc;
 
@@ -40,6 +42,9 @@ export function InitModule(
     matchTerminate: matchTerminate,
     matchSignal: matchSignal,
   });
+
+  // Register the Matchmaker Hook
+  initializer.registerMatchmakerMatched(matchmakerMatched);
 
   // Register RPCs
   initializer.registerRpc("create_match", createMatchRpc);

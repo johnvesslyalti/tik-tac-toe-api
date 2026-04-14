@@ -11,6 +11,40 @@ const OpCode = {
   REJECTED: 3,
 };
 
+const MATCH_LABEL_TYPE = "tictactoe";
+
+function buildMatchLabel(
+  status: "waiting" | "in_progress" | "finished",
+  state: logic.GameState,
+): string {
+  return JSON.stringify({
+    type: MATCH_LABEL_TYPE,
+    status,
+    playerCount: Object.keys(state.players).length,
+    open: status === "waiting" ? 1 : 0,
+    turn: state.currentPlayer,
+    winner: state.winner,
+  });
+}
+
+function tryUpdateMatchLabel(
+  dispatcher: nkruntime.MatchDispatcher,
+  logger: nkruntime.Logger,
+  label: string,
+): void {
+  try {
+    const runtimeDispatcher = dispatcher as nkruntime.MatchDispatcher & {
+      matchLabelUpdate?: (value: string) => void;
+    };
+
+    if (typeof runtimeDispatcher.matchLabelUpdate === "function") {
+      runtimeDispatcher.matchLabelUpdate(label);
+    }
+  } catch (error: unknown) {
+    logger.warn("Skipping match label update: %s", String(error));
+  }
+}
+
 export function matchInit(
   ctx: nkruntime.Context,
   logger: nkruntime.Logger,
@@ -18,10 +52,11 @@ export function matchInit(
   params: { [key: string]: string },
 ): { state: logic.GameState; tickRate: number; label: string } {
   logger.info("Tic-Tac-Toe match initialized");
+  const initialState = logic.createInitialState();
   return {
-    state: logic.createInitialState(),
+    state: initialState,
     tickRate: 10,
-    label: "tic-tac-toe",
+    label: buildMatchLabel("waiting", initialState),
   };
 }
 
@@ -69,13 +104,14 @@ export function matchJoin(
 
     if (Object.keys(state.players).length === 2) {
       state.gameStarted = true;
-      (nk as any).matchLabelUpdate(
-        ctx.matchId,
-        JSON.stringify({ status: "in_progress", turn: state.currentPlayer }),
+      tryUpdateMatchLabel(
+        dispatcher,
+        logger,
+        buildMatchLabel("in_progress", state),
       );
       logger.info("Match started: Player X vs Player O");
     } else {
-      (nk as any).matchLabelUpdate(ctx.matchId, JSON.stringify({ status: "waiting" }));
+      tryUpdateMatchLabel(dispatcher, logger, buildMatchLabel("waiting", state));
     }
   });
 
@@ -123,17 +159,16 @@ export function matchLoop(
 
         if (state.winner) {
           state.endTicks = 100; // Wait 100 ticks (~10 seconds at 10 tickRate) before terminating
-          (nk as any).matchLabelUpdate(
-            ctx.matchId,
-            JSON.stringify({ status: "finished", winner: state.winner }),
+          tryUpdateMatchLabel(
+            dispatcher,
+            logger,
+            buildMatchLabel("finished", state),
           );
         } else {
-          (nk as any).matchLabelUpdate(
-            ctx.matchId,
-            JSON.stringify({
-              status: "in_progress",
-              turn: state.currentPlayer,
-            }),
+          tryUpdateMatchLabel(
+            dispatcher,
+            logger,
+            buildMatchLabel("in_progress", state),
           );
         }
 
@@ -194,6 +229,9 @@ export function matchLeave(
     delete state.presences[presence.userId];
   });
 
+  const status = state.winner ? "finished" : "waiting";
+  tryUpdateMatchLabel(dispatcher, logger, buildMatchLabel(status, state));
+
   return { state };
 }
 
@@ -220,4 +258,20 @@ export function matchSignal(
   data: string,
 ): { state: logic.GameState; result: string } {
   return { state, result: data };
+}
+
+export function matchmakerMatched(
+  ctx: nkruntime.Context,
+  logger: nkruntime.Logger,
+  nk: nkruntime.Nakama,
+  matches: nkruntime.MatchmakerResult[]
+): string {
+  logger.info("Matchmaker matched -> creating authoritative match for %d players", matches.length);
+  try {
+    const matchId = nk.matchCreate("tic-tac-toe", {});
+    return matchId;
+  } catch (error: any) {
+    logger.error("Failed to create match from matchmaker: %s", error.message);
+    throw error;
+  }
 }
