@@ -42,6 +42,7 @@ export function listMatchesRpc(
       2,
       "+label.type:tictactoe",
     );
+    logger.info("Matches found: %s", JSON.stringify(matches));
     return JSON.stringify({ matches });
   } catch (e: any) {
     logger.error("Failed to list matches: %s", e.message);
