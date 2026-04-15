@@ -34,14 +34,7 @@ export function listMatchesRpc(
   logger.debug("RPC: list_matches called");
 
   try {
-    const matches = nk.matchList(
-      10,
-      true,
-      null,
-      0,
-      2,
-      "+label.type:tictactoe",
-    );
+    const matches = nk.matchList(10, true, null, 0, 2, "+label.type:tictactoe");
     logger.info("Matches found: %s", JSON.stringify(matches));
     return JSON.stringify({ matches });
   } catch (e: any) {

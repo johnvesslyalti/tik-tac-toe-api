@@ -111,7 +111,11 @@ export function matchJoin(
       );
       logger.info("Match started: Player X vs Player O");
     } else {
-      tryUpdateMatchLabel(dispatcher, logger, buildMatchLabel("waiting", state));
+      tryUpdateMatchLabel(
+        dispatcher,
+        logger,
+        buildMatchLabel("waiting", state),
+      );
     }
   });
 
@@ -263,9 +267,12 @@ export function matchmakerMatched(
   ctx: nkruntime.Context,
   logger: nkruntime.Logger,
   nk: nkruntime.Nakama,
-  matches: nkruntime.MatchmakerResult[]
+  matches: nkruntime.MatchmakerResult[],
 ): string {
-  logger.info("Matchmaker matched -> creating authoritative match for %d players", matches.length);
+  logger.info(
+    "Matchmaker matched -> creating authoritative match for %d players",
+    matches.length,
+  );
   try {
     const matchId = nk.matchCreate("tic-tac-toe", {});
     return matchId;

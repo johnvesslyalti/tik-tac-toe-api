@@ -20,7 +20,7 @@ export function InitModule(
   nk: nkruntime.Nakama,
   initializer: nkruntime.Initializer,
 ) {
-  // Manual global assignment for ES5/Goja compatibility - 
+  // Manual global assignment for ES5/Goja compatibility -
   // though now redundant with our 'strip exports' build step.
   const global: any = this || {};
   global.matchInit = matchInit;
