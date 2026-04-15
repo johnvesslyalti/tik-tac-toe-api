@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build:node": "tsc",
-    "build:nakama": "rollup -c && sed -i 's/^export //g' dist/modules/index.js",
+    "build:nakama": "rollup -c && sed -i 's/^export //g' dist/modules/index.js && sed -i '/^export {/d' dist/modules/index.js",
     "build": "npm run build:node && npm run build:nakama",
     "start": "node dist/index.js",
     "format": "prettier --write .",

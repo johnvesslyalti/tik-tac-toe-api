@@ -14,13 +14,15 @@ import { createMatchRpc, listMatchesRpc } from "./rpc";
  * Nakama JavaScript Runtime Entry Point (TypeScript)
  */
 export function InitModule(
+  this: any,
   ctx: nkruntime.Context,
   logger: nkruntime.Logger,
   nk: nkruntime.Nakama,
   initializer: nkruntime.Initializer,
 ) {
-  // Manual global assignment for ES5/Goja compatibility
-  const global: any = globalThis || {};
+  // Manual global assignment for ES5/Goja compatibility - 
+  // though now redundant with our 'strip exports' build step.
+  const global: any = this || {};
   global.matchInit = matchInit;
   global.matchJoinAttempt = matchJoinAttempt;
   global.matchJoin = matchJoin;
