@@ -68,10 +68,40 @@ sudo chmod +x /usr/local/bin/docker-compose
 
 ---
 
-## Schritt 4: Deployment
+## Schritt 4: Moving your Code to AWS
 
-1.  **Upload Code**: Use SCP or Git to get your `tic-tac-toe-api` code onto the server.
-2.  **Environment Variables**: Create a `.env` file in the project folder:
+You have two choices for getting your code from your computer onto the AWS instance.
+
+### Choice A: Secure Copy (SCP) - *Fastest for a one-time test*
+Open a terminal **on your local machine** (the one you are using right now) and run:
+```bash
+# Replace 'your-key.pem' and 'your-ec2-ip' with your actual details
+scp -i your-key.pem -r ./tic-tac-toe-api ec2-user@your-ec2-ip:~/
+```
+
+### Choice B: Git - *Best for regular updates*
+1.  **On the AWS Server**, install git:
+    ```bash
+    sudo dnf install git -y
+    ```
+2.  **Clone your repository**:
+    ```bash
+    git clone https://github.com/your-username/tic-tac-toe-api.git
+    cd tic-tac-toe-api
+    ```
+
+---
+
+## Schritt 5: Configuration & Launch
+
+Now that your code is on the server, follow these steps:
+
+1.  **Navigate into the folder**: `cd ~/tic-tac-toe-api`
+2.  **Create the Production .env**:
+    ```bash
+    nano .env
+    ```
+    *Paste these values and update them:*
     ```env
     FRONTEND_URL=https://your-app.vercel.app
     POSTGRES_DB=nakama
@@ -79,14 +109,16 @@ sudo chmod +x /usr/local/bin/docker-compose
     NAKAMA_SERVER_KEY=your_secure_key
     NAKAMA_PORT=7350
     ```
+    *(Press `Ctrl+O`, `Enter`, then `Ctrl+X` to save and exit)*
+
 3.  **Start Services**:
     ```bash
-    docker-compose up -d
+    docker-compose up -d --build
     ```
 
 ---
 
-## Schritt 5: Frontend Configuration (Vercel)
+## Schritt 6: Frontend Configuration (Vercel)
 
 1.  Connect your GitHub repo to **Vercel**.
 2.  Add **Environment Variables** in the Vercel Dashboard:
