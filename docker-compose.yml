@@ -28,12 +28,10 @@ services:
       - "-ecx"
       - >
         /nakama/nakama migrate up --database.address postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB} &&
-        exec /nakama/nakama --name nakama1 --database.address postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB} --logger.level INFO --runtime.js_entrypoint "index.js"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:7350/"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+        exec /nakama/nakama --name nakama1 --database.address postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB} --logger.level INFO --runtime.js_entrypoint "index.js" --socket.server_key "${NAKAMA_SOCKET_SERVER_KEY}" --runtime.http_key "${NAKAMA_SERVER_KEY}"
+    ports:
+      - "7350:7350"
+      - "7351:7351"
 
   node-app:
     build:
@@ -46,6 +44,8 @@ services:
       - .env
     environment:
       - PORT=5000
+    ports:
+      - "5000:5000"
 
   caddy:
     image: caddy:2-alpine
