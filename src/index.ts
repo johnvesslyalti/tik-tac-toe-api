@@ -9,8 +9,16 @@ app.use(
     origin: frontendUrl,
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
+    allowedHeaders: ["Content-Type", "x-server-key"],
+    exposedHeaders: ["x-server-key"],
   }),
 );
+
+// Debug middleware – prints the x-server-key header for every request
+app.use((req, res, next) => {
+  console.log('[DEBUG] x-server-key header:', req.headers['x-server-key']);
+  next();
+});
 
 app.use(express.json());
 
