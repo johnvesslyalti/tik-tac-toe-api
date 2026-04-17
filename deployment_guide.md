@@ -113,6 +113,7 @@ Now that your code is on the server, follow these steps:
 
 3.  **Start Services**:
     ```bash
+    # This will now build both the Node proxy and the Nakama modules automatically
     docker-compose up -d --build
     ```
 

@@ -1,0 +1,21 @@
+# Stage 1: Build the TypeScript modules
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Copy dependency files first for caching
+COPY package*.json ./
+RUN npm install
+
+# Copy source code
+COPY . .
+
+# Run the build script specifically for Nakama
+# This uses rollup and sed to create a Nakama-compatible JS bundle
+RUN npm run build:nakama
+
+# Stage 2: Final Nakama image
+FROM registry.heroiclabs.com/heroiclabs/nakama:3.22.0
+
+# Copy the built modules from the builder stage to the Nakama modules directory
+COPY --from=builder /app/dist/modules/ /nakama/data/modules/
